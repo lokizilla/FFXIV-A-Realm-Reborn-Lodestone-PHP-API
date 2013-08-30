@@ -37,6 +37,7 @@ Available Features
 Copyright Details
 ==============================================
 Original idea / version: http://github.com/rysas/Final-Fantasy-XIV-Lodestone-PHP-API
+
 Updated by Loki: http://lokizilla.net | http://github.com/lokizilla
 
 © 2010 SQUARE ENIX CO., LTD. All Rights Reserved. FINAL FANTASY, FFXIV, SQUARE ENIX and the SQUARE ENIX logo are registered trademarks or trademarks of Square Enix Holdings Co., Ltd. "PlayStation" and the "PS" Family logo are registered trademarks and "PS3" is a trademark of Sony Computer Entertainment Inc. The PlayStation Network Logo is a service mark of Sony Computer Entertainment Inc. The ESRB rating icon is a registered trademark of the Entertainment Software Association. All other trademarks are the properties of their respective owners.
