@@ -1,7 +1,9 @@
-Final Fantasy XIV Lodestone PHP API
+Final Fantasy XIV: A Realm Reborn Lodestone PHP API
 ==============================================
 
-I need something specific to my needs as I have a few projects in the lineup that will require this.
+An updated version of the original project, to work with the "new" Lodestone.
+
+As of typing, I've not updated anything (I'm more interested in playing right now!) but I'll be working on this in the near future.
 
 * * *
 
@@ -34,9 +36,7 @@ Available Features
 
 Copyright Details
 ==============================================
-Use and abuse my code, thought, please give credit where credit is due.
+Original idea / version: http://github.com/rysas/Final-Fantasy-XIV-Lodestone-PHP-API
+Updated by Loki: http://lokizilla.net | http://github.com/lokizilla
 
-© 2010 SQUARE ENIX CO., LTD. All Rights Reserved.
-FINAL FANTASY, FFXIV, SQUARE ENIX and the SQUARE ENIX logo are registered trademarks or trademarks of Square Enix Holdings Co., Ltd. "PlayStation" and the "PS"
-Family logo are registered trademarks and "PS3" is a trademark of Sony Computer Entertainment Inc. The PlayStation Network Logo is a service mark of Sony Computer Entertainment Inc. 
-The ESRB rating icon is a registered trademark of the Entertainment Software Association. All other trademarks are the properties of their respective owners
+© 2010 SQUARE ENIX CO., LTD. All Rights Reserved. FINAL FANTASY, FFXIV, SQUARE ENIX and the SQUARE ENIX logo are registered trademarks or trademarks of Square Enix Holdings Co., Ltd. "PlayStation" and the "PS" Family logo are registered trademarks and "PS3" is a trademark of Sony Computer Entertainment Inc. The PlayStation Network Logo is a service mark of Sony Computer Entertainment Inc. The ESRB rating icon is a registered trademark of the Entertainment Software Association. All other trademarks are the properties of their respective owners.
