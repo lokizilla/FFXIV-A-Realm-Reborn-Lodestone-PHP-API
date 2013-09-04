@@ -1,8 +1,9 @@
 <?php
-/* Final Fantasy XIV Lodestone API
- * http://rysas.net/ffxiv/
- * Damian Miller (damian@offthewallmedia.com)
- * Updated: 11/6/2010
+/* Final Fantasy XIV: ARR Lodestone API
+ * http://lokizilla.net
+ * Original version: Damian Miller (damian@offthewallmedia.com, http://rysas.net/ffxiv/)
+ * This version: Leslie Moore (loki@lokizilla.net)
+ * Updated: 31/08/2013
  */
 
 include_once ('simple_html_dom.php');
@@ -16,7 +17,9 @@ class ffxivLodestoneAPI {
   private static $instance;
   
   // Final Fantasy Config Vars
-  private $LodestoneURL = "http://lodestone.finalfantasyxiv.com";
+  private $LodestoneENURL = "http://eu.finalfantasyxiv.com/lodestone"; // EU/NA are identical for this purpose
+  private $LodestoneJPURL = "http://jp.finalfantasyxiv.com/lodestone"; // in future JP would be nice too!
+
   public $ServerList = array(
     2 => 'Cornelia',
     3 => 'Kashuan',
@@ -79,7 +82,7 @@ class ffxivLodestoneAPI {
     
     $context = stream_context_create ( $context );
     
-    return file_get_html( $this->LodestoneURL . $url, false, $context );
+    return file_get_html( $this->LodestoneENURL . $url, false, $context );
   }
 
   // Search 
@@ -117,45 +120,52 @@ class ffxivLodestoneAPI {
   public function GetCharacterData ( $CharacterID ) {
     $Result = new SimpleXMLElement("<Character></Character>");
     
-    $html = $this->GetHTMLObject ( '/rc/character/status?cicuid=' . $CharacterID )->find('div.contents-frame-inner', 0);
-    
-    $Result->CharacterName = $html->find('div#charname div', 0)->plaintext;
-    
-    $ProfileTable = $html->find('table#profile-table tbody', 0);
-    
-    $Result->CharacterRace = rtrim($ProfileTable->children(0)->plaintext);
-    $Result->CharacterCurrentSkill = rtrim($ProfileTable->children(1)->children(1)->plaintext);
-    $Result->CharacterNamesday = rtrim($ProfileTable->children(2)->children(2)->plaintext);
-    $Result->CharacterGuardian = rtrim($ProfileTable->children(3)->children(1)->plaintext);
-    $Result->CharacterStartingCity = rtrim($ProfileTable->children(4)->children(2)->plaintext);
-    $Result->CharacterPhysicalLevel = rtrim($ProfileTable->children(5)->children(2)->plaintext);
-    $Result->CharacterExperiencePoints = rtrim($ProfileTable->children(6)->children(2)->plaintext);
-    $Result->CharacterHP = rtrim($ProfileTable->children(7)->children(2)->plaintext);
-    $Result->CharacterMP = rtrim($ProfileTable->children(8)->children(2)->plaintext);
-    $Result->CharacterTP = rtrim($ProfileTable->children(9)->children(2)->plaintext);
-    
-    $AttributesTable = $html->find('div.floatLeft table tbody', 0);
-    
-    $Result->CharacterAttributes->Strength = rtrim($AttributesTable->children(0)->children(1)->plaintext);
-    $Result->CharacterAttributes->Vitality = rtrim($AttributesTable->children(1)->children(1)->plaintext);
-    $Result->CharacterAttributes->Dexterity = rtrim($AttributesTable->children(2)->children(1)->plaintext);
-    $Result->CharacterAttributes->Intelligence = rtrim($AttributesTable->children(3)->children(1)->plaintext);
-    $Result->CharacterAttributes->Mind = rtrim($AttributesTable->children(4)->children(1)->plaintext);
-    $Result->CharacterAttributes->Piety = rtrim($AttributesTable->children(5)->children(1)->plaintext);
+    $html = $this->GetHTMLObject ( '/character/' . $CharacterID )->find('div#main', 0);
 
-    $ElementsTable = $html->find('div.floatRight table tbody', 0);
+    $Result->CharacterName = $html->find('div.area_footer', 0)->children(2)->children(0)->plaintext;
+    //$Result->CharacterAvatar40x40 = $html->find('div.area_footer', 0)->children(0)->children(0)->children(0); // TODO: doesn't work
+    $Result->CharacterWorld = $html->find('div.area_footer', 0)->children(2)->children(1)->plaintext; // TODO: filter out cruft
     
-    $Result->CharacterElements->Fire = rtrim($ElementsTable->children(0)->children(1)->plaintext);
-    $Result->CharacterElements->Water = rtrim($ElementsTable->children(1)->children(1)->plaintext);
-    $Result->CharacterElements->Lightning = rtrim($ElementsTable->children(2)->children(1)->plaintext);
-    $Result->CharacterElements->Wind = rtrim($ElementsTable->children(3)->children(1)->plaintext);
-    $Result->CharacterElements->Earth = rtrim($ElementsTable->children(4)->children(1)->plaintext);
-    $Result->CharacterElements->Ice = rtrim($ElementsTable->children(5)->children(1)->plaintext);
+
+    $ProfileList = $html->find('ul.chara_profile_list', 0);
+    $Result->CharacterFreeCompany = rtrim($ProfileList->children(3)->children(2)->plaintext);
+    // $Result->CharacterFreeCompanyIMG = rtrim($ProfileList->children(3)->children(0)); // TODO: return just the src
+
+    // $Result->CharacterRace = rtrim($ProfileTable->children(0)->plaintext); 
+    // $Result->CharacterCurrentSkill = rtrim($ProfileTable->children(1)->children(1)->plaintext);
+    // $Result->CharacterNamesday = rtrim($ProfileTable->children(2)->children(2)->plaintext);
+    // $Result->CharacterGuardian = rtrim($ProfileTable->children(3)->children(1)->plaintext);
+    // $Result->CharacterStartingCity = rtrim($ProfileTable->children(4)->children(2)->plaintext);
+    // $Result->CharacterPhysicalLevel = rtrim($ProfileTable->children(5)->children(2)->plaintext);
+    // $Result->CharacterExperiencePoints = rtrim($ProfileTable->children(6)->children(2)->plaintext);
+
+    $PowerGauge = $html->find('ul#power_gauge', 0);
+    $Result->CharacterPowergauge->HP = rtrim($PowerGauge->children(0)->plaintext);
+    $Result->CharacterPowergauge->MP = rtrim($PowerGauge->children(1)->plaintext);
+    $Result->CharacterPowergauge->TP = rtrim($PowerGauge->children(2)->plaintext);
     
-    foreach ( $html->find('th.mainskill-label', 0)->parent()->parent()->children() as $Class ) {
-    	$Result->CharacterClass->{$Class->children(0)->plaintext}->Rank = (int) $Class->children(1)->children(0)->children(0)->children(2)->plaintext;
-		  $Result->CharacterClass->{$Class->children(0)->plaintext}->SkillPoints = str_replace('-','0',$Class->children(2)->children(0)->children(0)->children(2)->plaintext);
-    }
+    $AttributesTable = $html->find('ul.param_list_attributes', 0);
+    $Result->CharacterAttributes->Strength = rtrim($AttributesTable->children(0)->plaintext);
+    $Result->CharacterAttributes->Vitality = rtrim($AttributesTable->children(1)->plaintext);
+    $Result->CharacterAttributes->Dexterity = rtrim($AttributesTable->children(2)->plaintext);
+    $Result->CharacterAttributes->Intelligence = rtrim($AttributesTable->children(3)->plaintext);
+    $Result->CharacterAttributes->Mind = rtrim($AttributesTable->children(4)->plaintext);
+    $Result->CharacterAttributes->Piety = rtrim($AttributesTable->children(5)->plaintext);
+
+    // $ElementsTable = $html->find('div.floatRight table tbody', 0);
+    //$ElementsTable = $html->find('ul.param_list_elemental', 0);
+
+    // $Result->CharacterElements->Fire = rtrim($ElementsTable->children(0)->children(1)->plaintext);
+    // $Result->CharacterElements->Water = rtrim($ElementsTable->children(1)->children(1)->plaintext);
+    // $Result->CharacterElements->Lightning = rtrim($ElementsTable->children(2)->children(1)->plaintext);
+    // $Result->CharacterElements->Wind = rtrim($ElementsTable->children(3)->children(1)->plaintext);
+    // $Result->CharacterElements->Earth = rtrim($ElementsTable->children(4)->children(1)->plaintext);
+    // $Result->CharacterElements->Ice = rtrim($ElementsTable->children(5)->children(1)->plaintext);
+    
+    // foreach ( $html->find('th.mainskill-label', 0)->parent()->parent()->children() as $Class ) {
+    //   $Result->CharacterClass->{$Class->children(0)->plaintext}->Rank = (int) $Class->children(1)->children(0)->children(0)->children(2)->plaintext;
+    //   $Result->CharacterClass->{$Class->children(0)->plaintext}->SkillPoints = str_replace('-','0',$Class->children(2)->children(0)->children(0)->children(2)->plaintext);
+    // }
     
     return $Result;
   }
@@ -180,7 +190,7 @@ class ffxivLodestoneAPI {
       $Result = new SimpleXMLElement("<BlogPost></BlogPost>");
       $Result->PostName = substr($BlogPost->find('a',0)->plaintext, 0, strpos($BlogPost->find('a',0)->plaintext, '&nbsp;'));
       $Result->PostCommentCount = (int) substr(substr($BlogPost->find('a',0)->plaintext,strpos($BlogPost->find('a',0)->plaintext, '&nbsp;')+7),0,-1);
-      $Result->PostHref = $this->LodestoneURL . $BlogPost->find('a',0)->href;
+      $Result->PostHref = $this->LodestoneENURL . $BlogPost->find('a',0)->href;
        
       $Results[] = $Result;
     }
