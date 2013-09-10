@@ -3,36 +3,41 @@ Final Fantasy XIV: A Realm Reborn Lodestone PHP API
 
 An updated version of the original project, to work with the "new" Lodestone.
 
-As of typing, I've not updated anything (I'm more interested in playing right now!) but I'll be working on this in the near future.
-
-* * *
-
 Available Features
 ==============================================
-**Character Searching**
->$obj->SearchCharacterList ( $CharacterName, $Server = false, $Class = false )
-
 **Character Details Page**
->$obj->GetCharacterData ( $CharacterID )
+`$obj->GetCharacterData($CharacterID)` / `request=characterData&characterID=[characterID]`
+
+Returns character data for the given character ID.
+
+Accessing via URL
+==============================================
+You can grab either XML or JSON output.
+
+An example query string would be:
+`index.php?request=characterData&characterID=[characterID]&responseType=json`
+
+The `request` and `characterID` queries are required; the `responseType` defaults to XML and is therefore not required unless you require JSON output.
+
+Remaining to Update
+==============================================
+**Character Searching**
+`$obj->SearchCharacterList($CharacterName, $Server = false, $Class = false)`
 
 **Character Biography**
->$obj->GetCharacterBiography( $CharacterID )
+`$obj->GetCharacterBiography($CharacterID)`
 
 **Character Recent Blog Entries**
->$obj->GetCharacterRecentBlogEntries( $CharacterID )
+`$obj->GetCharacterRecentBlogEntries($CharacterID)`
 
 **Character Following Count**
->$obj->GetCharacterFollowingCount( $CharacterID )
+`$obj->GetCharacterFollowingCount($CharacterID)`
 
 **Character Follower Count**
->$obj->GetCharacterFollowerCount( $CharacterID )
+`$obj->GetCharacterFollowerCount($CharacterID)`
 
 **Character History**
->$obj->GetCharacterHistory ( $CharacterID, $page = 1 )    
-*defaults to 100 per page* 
-
-* * *
-
+`$obj->GetCharacterHistory($CharacterID, $page = 1)` *defaults to 100 per page* 
 
 Copyright Details
 ==============================================
