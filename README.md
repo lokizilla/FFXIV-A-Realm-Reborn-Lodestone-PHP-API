@@ -6,38 +6,41 @@ An updated version of the original project, to work with the "new" Lodestone.
 Available Features
 ==============================================
 **Character Details Page**
-`$obj->GetCharacterData($CharacterID)` / `request=characterData&characterID=[characterID]`
+>`$obj->GetCharacterData($CharacterID)` / `request=characterData&characterID=[characterID]`
 
 Returns character data for the given character ID.
+Sample XML-format data for this can be found at: https://gist.github.com/lokizilla/6513918
+The PHP object returns data in the same layout.
 
 Accessing via URL
 ==============================================
 You can grab either XML or JSON output.
 
 An example query string would be:
-`index.php?request=characterData&characterID=[characterID]&responseType=json`
+>`index.php?request=characterData&characterID=[characterID]&responseType=json`
 
 The `request` and `characterID` queries are required; the `responseType` defaults to XML and is therefore not required unless you require JSON output.
 
 Remaining to Update
 ==============================================
 **Character Searching**
-`$obj->SearchCharacterList($CharacterName, $Server = false, $Class = false)`
+>`$obj->SearchCharacterList($CharacterName, $Server = false, $Class = false)`
 
 **Character Biography**
-`$obj->GetCharacterBiography($CharacterID)`
+>`$obj->GetCharacterBiography($CharacterID)`
 
 **Character Recent Blog Entries**
-`$obj->GetCharacterRecentBlogEntries($CharacterID)`
+>`$obj->GetCharacterRecentBlogEntries($CharacterID)`
 
 **Character Following Count**
-`$obj->GetCharacterFollowingCount($CharacterID)`
+>`$obj->GetCharacterFollowingCount($CharacterID)`
 
 **Character Follower Count**
-`$obj->GetCharacterFollowerCount($CharacterID)`
+>`$obj->GetCharacterFollowerCount($CharacterID)`
 
 **Character History**
-`$obj->GetCharacterHistory($CharacterID, $page = 1)` *defaults to 100 per page* 
+>`$obj->GetCharacterHistory($CharacterID, $page = 1)` 
+*defaults to 100 per page* 
 
 Copyright Details
 ==============================================
