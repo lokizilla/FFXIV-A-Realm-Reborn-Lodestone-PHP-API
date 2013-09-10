@@ -16,9 +16,7 @@ class ffxivLodestoneAPI {
 	private static $instance;
 
 	// Final Fantasy Config Vars
-	private $LodestoneENURL = "http://eu.finalfantasyxiv.com/lodestone"; // EU/NA are identical for this purpose
-	private $LodestoneJPURL = "http://jp.finalfantasyxiv.com/lodestone"; // in future JP would be nice too!
-
+	private $LodestoneURL = "http://eu.finalfantasyxiv.com/lodestone"; // EU/NA are identical for this purpose
 
 	public $ServerList = array
 	(
@@ -86,7 +84,7 @@ class ffxivLodestoneAPI {
 
 		// TODO:  check the php environment for use of the allow_url_fopen directive: if 1 then use this, if 0 then use cURL
 		//        commented out for the time being as my development environment does not support the directive
-		//return file_get_html( $this->LodestoneENURL . $url, false, $context );
+		//return file_get_html( $this->LodestoneURL . $url, false, $context );
 
 		// get the page using cURL
 		$html = new simple_html_dom();
@@ -96,7 +94,7 @@ class ffxivLodestoneAPI {
 
 	private function cURL($url)
 	{
-		$cURL = curl_init($this->LodestoneENURL.$url);
+		$cURL = curl_init($this->LodestoneURL.$url);
 
 		curl_setopt($cURL, CURLOPT_HEADER, false); // return headers
 		curl_setopt($cURL, CURLOPT_RETURNTRANSFER, 1); // output into a var
@@ -144,34 +142,54 @@ class ffxivLodestoneAPI {
 		return $Results;    
 	}
 
-
-
 	public function GetCharacterData($CharacterID) 
 	{
 		$Result = new SimpleXMLElement("<Character></Character>");
 
 		$html = $this->GetHTMLObject ('/character/'.$CharacterID)->find('div#main', 0);
 
-		$Result->CharacterName = $html->find('div.area_footer', 0)->children(2)->children(0)->plaintext;
-		$Result->CharacterRace = $html->find('div.chara_profile_title', 0)->plaintext; // TODO: filter out cruft
-		$Result->CharacterWorld = $html->find('div.area_footer', 0)->children(2)->children(1)->plaintext; // TODO: filter out cruft
-		//$Result->CharacterAvatar50x50 = $html->find('div.area_footer', 0)->children(0)->children(0)->children(0); // TODO: doesn't work
-
 		$ProfileList = $html->find('ul.chara_profile_list', 0);
-		$Result->CharacterFreeCompany = rtrim($ProfileList->children(3)->children(2)->plaintext);
-		// $Result->CharacterFreeCompanyIMG = rtrim($ProfileList->children(3)->children(0)); // TODO: return just the src
-		// $Result->CharacterCurrentSkill = rtrim($ProfileTable->children(1)->children(1)->plaintext); // TODO: see below
+		$PowerGauge = $html->find('ul#power_gauge', 0);
+		$AttributesTable = $html->find('ul.param_list_attributes', 0);
+		$ElementsTable = $html->find('ul.param_list_elemental', 0);
+		$SkillLevels = $html->find('div.base_inner', 0);
+
+		$Result->CharacterName = $html->find('div.area_footer', 0)->children(2)->children(0)->plaintext;
+		$Result->CharacterRace = substr($html->find('div.chara_profile_title', 0)->plaintext, 0, strpos($html->find('div.chara_profile_title', 0)->plaintext, "/"));
+		$Result->CharacterSubRace = substr($html->find('div.chara_profile_title', 0), strpos($html->find('div.chara_profile_title', 0), "/") + 2, strpos($html->find('div.chara_profile_title', 0), "/") + 2 - strpos($html->find('div.chara_profile_title', 0), "\n"));
+		if (strpos($html->find('div.chara_profile_title', 0), "♂") !== false) $Result->CharacterGender = 'Male'; else $Result->CharacterGender = 'Female';
+		$Result->CharacterWorld = substr($html->find('div.area_footer', 0)->children(2)->children(1)->plaintext, 2, strpos($html->find('div.area_footer', 0)->children(2)->children(1)->plaintext, ")") - 2);
+		$Result->CharacterImage264x360 = substr($html->find('div.bg_chara_264', 0)->find('img', 0), 10, strpos($html->find('div.bg_chara_264', 0)->find('img', 0), 'width') - 12);
+		$Result->CharacterAvatar50x50 = substr($html->find('div.thumb_cont_black_40', 0)->find('img', 0), 10, strpos($html->find('div.thumb_cont_black_40', 0)->find('img', 0), 'width') - 12);
 		$Result->CharacterNamesday = rtrim($ProfileList->children(0)->children(0)->children(0)->children(1)->children(0)->children(0)->children(1)->plaintext);
 		$Result->CharacterGuardian = rtrim($ProfileList->children(0)->children(0)->children(0)->children(1)->children(0)->children(1)->children(1)->plaintext);
 		$Result->CharacterStartingCity = rtrim($ProfileList->children(1)->children(2)->plaintext);
-		$Result->CharacterPhysicalLevel = rtrim($html->find('div.level', 0)->plaintext); // TODO: filter out cruft
 
-		$PowerGauge = $html->find('ul#power_gauge', 0);
+		if ($ProfileList->children(2)) // check for existence of grand / free company
+		{
+			if (strpos($ProfileList->children(2), "Free Company") !== false) // if free company:
+			{
+				$Result->CharacterFreeCompany = rtrim($ProfileList->children(2)->children(2)->plaintext);
+				$Result->CharacterFreeCompanyURL = substr($ProfileList->children(2)->find('a', 0), 9, strpos($ProfileList->children(2)->find('a', 0), 'class') - 11);
+			}
+			else // if grand company:
+			{
+				$Result->CharacterGrandCompany = substr($ProfileList->children(2)->children(2)->plaintext, 0, strpos($ProfileList->children(2)->children(2)->plaintext, "/"));
+				$Result->CharacterGrandCompanyRank = substr($ProfileList->children(2)->children(2)->plaintext, strpos($ProfileList->children(2)->children(2)->plaintext, "/") + 1);
+				$Result->CharacterGrandCompanyRankIMG = substr($ProfileList->children(2)->find('img', 0), 10, strpos($ProfileList->children(2)->find('img', 0), 'width') - 12);
+			}
+		}
+
+		if ($ProfileList->children(3)) // check for existence of free company (children(3); grand company is children(2))
+		{
+			$Result->CharacterFreeCompany = rtrim($ProfileList->children(3)->children(2)->plaintext);
+			$Result->CharacterFreeCompanyURL = "http://eu.finalfantasyxiv.com/lodestone".substr($ProfileList->children(3)->find('a', 0), 9, strpos($ProfileList->children(3)->find('a', 0), 'class') - 11); // TODO: hax, fix
+		}
+
 		$Result->CharacterPowergauge->HP = rtrim($PowerGauge->children(0)->plaintext);
 		$Result->CharacterPowergauge->MP = rtrim($PowerGauge->children(1)->plaintext); // TODO: name this as MP/CP
 		$Result->CharacterPowergauge->TP = rtrim($PowerGauge->children(2)->plaintext);
 
-		$AttributesTable = $html->find('ul.param_list_attributes', 0);
 		$Result->CharacterAttributes->Strength = rtrim($AttributesTable->children(0)->plaintext);
 		$Result->CharacterAttributes->Vitality = rtrim($AttributesTable->children(1)->plaintext);
 		$Result->CharacterAttributes->Dexterity = rtrim($AttributesTable->children(2)->plaintext);
@@ -179,7 +197,6 @@ class ffxivLodestoneAPI {
 		$Result->CharacterAttributes->Mind = rtrim($AttributesTable->children(4)->plaintext);
 		$Result->CharacterAttributes->Piety = rtrim($AttributesTable->children(5)->plaintext);
 
-		$ElementsTable = $html->find('ul.param_list_elemental', 0);
 		$Result->CharacterElements->Fire = rtrim($ElementsTable->children(0)->children(0)->plaintext);
 		$Result->CharacterElements->Water = rtrim($ElementsTable->children(1)->children(0)->plaintext);
 		$Result->CharacterElements->Lightning = rtrim($ElementsTable->children(2)->children(0)->plaintext);
@@ -187,7 +204,8 @@ class ffxivLodestoneAPI {
 		$Result->CharacterElements->Earth = rtrim($ElementsTable->children(4)->children(0)->plaintext);
 		$Result->CharacterElements->Ice = rtrim($ElementsTable->children(5)->children(0)->plaintext);
 
-		$SkillLevels = $html->find('div.base_inner', 0);
+		// $Result->CharacterCurrentSkill = rtrim($ProfileTable->children(1)->children(1)->plaintext); // TODO: see below
+		// $Result->CharacterCurrentSkillLevel = rtrim($html->find('div.level', 0)->plaintext); // TODO: filter out cruft
 
 		$Result->CharacterSkillLevels->War->Gladiator->Level = $SkillLevels->children(1)->children(0)->children(0)->children(1)->plaintext;
 		$Result->CharacterSkillLevels->War->Gladiator->EXP = $SkillLevels->children(1)->children(0)->children(0)->children(2)->plaintext;
@@ -226,7 +244,7 @@ class ffxivLodestoneAPI {
 		$Result->CharacterSkillLevels->Land->Botanist->Level = $SkillLevels->children(7)->children(0)->children(0)->children(4)->plaintext;
 		$Result->CharacterSkillLevels->Land->Botanist->EXP = $SkillLevels->children(7)->children(0)->children(0)->children(5)->plaintext;
 		$Result->CharacterSkillLevels->Land->Fisher->Level = $SkillLevels->children(7)->children(0)->children(1)->children(1)->plaintext;
-		$Result->CharacterSkillLevels->Land->Fisher->EXP = $SkillLevels->children(7)->children(0)->children(1)->children(2)->plaintext;
+		$Result->CharacterSkillLevels->Land->Fisher->EXP = $SkillLevels->children(7)->children(0)->children(1)->children(2)->plaintext;				
 
 		return $Result;
 
@@ -240,7 +258,6 @@ class ffxivLodestoneAPI {
 			// it should therefore be possible to iterate through these and eliminate each class until we find which one is suitable
 			// this doesn't count for soul crystals, used in jobs; check the soul crystal first and take the name from the result
 		// TODO: equipped items and stats in each slot
-		// TODO: return the character image
 		// TODO: minions and mounts
 		// TODO: character profile
 		// TODO: validation
@@ -270,7 +287,7 @@ class ffxivLodestoneAPI {
 			$Result = new SimpleXMLElement("<BlogPost></BlogPost>");
 			$Result->PostName = substr($BlogPost->find('a',0)->plaintext, 0, strpos($BlogPost->find('a',0)->plaintext, '&nbsp;'));
 			$Result->PostCommentCount = (int) substr(substr($BlogPost->find('a',0)->plaintext,strpos($BlogPost->find('a',0)->plaintext, '&nbsp;')+7),0,-1);
-			$Result->PostHref = $this->LodestoneENURL . $BlogPost->find('a',0)->href;
+			$Result->PostHref = $this->LodestoneURL . $BlogPost->find('a',0)->href;
 
 			$Results[] = $Result;
 		}
