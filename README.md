@@ -6,10 +6,11 @@ An updated version of the original project, to work with the "new" Lodestone.
 Available Features
 ==============================================
 **Character Details Page**
->`$obj->GetCharacterData($CharacterID)` / `request=characterData&characterID=[characterID]`
+>`$obj->GetCharacterData($CharacterID)`  
+`index.php?request=characterData&characterID=[characterID]`
 
-Returns character data for the given character ID.
-Sample XML-format data for this can be found at: https://gist.github.com/lokizilla/6513918
+Returns character data for the given character ID.  
+Sample XML-format data for this can be found at: https://gist.github.com/lokizilla/6513918  
 The PHP object returns data in the same layout.
 
 Accessing via URL
@@ -39,7 +40,7 @@ Remaining to Update
 >`$obj->GetCharacterFollowerCount($CharacterID)`
 
 **Character History**
->`$obj->GetCharacterHistory($CharacterID, $page = 1)` 
+>`$obj->GetCharacterHistory($CharacterID, $page = 1)`  
 *defaults to 100 per page* 
 
 Copyright Details
