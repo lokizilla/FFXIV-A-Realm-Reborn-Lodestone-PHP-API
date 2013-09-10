@@ -113,15 +113,8 @@ if(isset($_GET)&&isset($_GET['request'])) {
       break;  
       
     default:
-        die('request type not found');
-        break;
-  }
+      die('request type not found');
+      break;
+    }
 }
-
-//6924763 - me
-//1637278 - Justin
-
-
-
-
 ?>
