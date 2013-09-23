@@ -155,8 +155,9 @@ class ffxivLodestoneAPI {
 		$SkillLevels = $html->find('div.base_inner', 0);
 
 		$Result->CharacterName = $html->find('div.area_footer', 0)->children(2)->children(0)->plaintext;
-		$Result->CharacterRace = substr($html->find('div.chara_profile_title', 0)->plaintext, 0, strpos($html->find('div.chara_profile_title', 0)->plaintext, "/"));
-		$Result->CharacterSubRace = substr($html->find('div.chara_profile_title', 0), strpos($html->find('div.chara_profile_title', 0), "/") + 2, strpos($html->find('div.chara_profile_title', 0), "/") + 2 - strpos($html->find('div.chara_profile_title', 0), "\n"));
+		$Result->CharacterRace = substr($html->find('div.chara_profile_title', 0)->plaintext, 0, strpos($html->find('div.chara_profile_title', 0)->plaintext, "/") - 1);
+		$Result->CharacterSubRace = substr($html->find('div.chara_profile_title', 0)->plaintext, strpos($html->find('div.chara_profile_title', 0)->plaintext, "/") + 2, (strpos(json_encode($html->find('div.chara_profile_title', 0)->plaintext), "\\n") - 2) - (strpos($html->find('div.chara_profile_title', 0)->plaintext, "/") + 2));
+
 		if (strpos($html->find('div.chara_profile_title', 0), "♂") !== false) $Result->CharacterGender = 'Male'; else $Result->CharacterGender = 'Female';
 		$Result->CharacterWorld = substr($html->find('div.area_footer', 0)->children(2)->children(1)->plaintext, 2, strpos($html->find('div.area_footer', 0)->children(2)->children(1)->plaintext, ")") - 2);
 		$Result->CharacterImage264x360 = substr($html->find('div.bg_chara_264', 0)->find('img', 0), 10, strpos($html->find('div.bg_chara_264', 0)->find('img', 0), 'width') - 12);
@@ -205,7 +206,7 @@ class ffxivLodestoneAPI {
 		$Result->CharacterElements->Ice = rtrim($ElementsTable->children(5)->children(0)->plaintext);
 
 		// $Result->CharacterCurrentSkill = rtrim($ProfileTable->children(1)->children(1)->plaintext); // TODO: see below
-		// $Result->CharacterCurrentSkillLevel = rtrim($html->find('div.level', 0)->plaintext); // TODO: filter out cruft
+		$Result->CharacterCurrentSkillLevel = substr(rtrim($html->find('div.level', 0)->plaintext), 6);
 
 		$Result->CharacterSkillLevels->War->Gladiator->Level = $SkillLevels->children(1)->children(0)->children(0)->children(1)->plaintext;
 		$Result->CharacterSkillLevels->War->Gladiator->EXP = $SkillLevels->children(1)->children(0)->children(0)->children(2)->plaintext;
