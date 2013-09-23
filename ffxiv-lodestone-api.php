@@ -154,11 +154,12 @@ class ffxivLodestoneAPI {
 		$ElementsTable = $html->find('ul.param_list_elemental', 0);
 		$SkillLevels = $html->find('div.base_inner', 0);
 
-		$Result->CharacterName = $html->find('div.area_footer', 0)->children(2)->children(0)->plaintext;
+		$Result->CharacterFirstName = substr($html->find('div.area_footer', 0)->children(2)->children(0)->plaintext, 0, strpos($html->find('div.area_footer', 0)->children(2)->children(0)->plaintext, " "));
+		$Result->CharacterLastName = substr($html->find('div.area_footer', 0)->children(2)->children(0)->plaintext, strpos($html->find('div.area_footer', 0)->children(2)->children(0)->plaintext, " ") + 1);
+		$Result->CharacterFullName = $html->find('div.area_footer', 0)->children(2)->children(0)->plaintext;
 		$Result->CharacterRace = substr($html->find('div.chara_profile_title', 0)->plaintext, 0, strpos($html->find('div.chara_profile_title', 0)->plaintext, "/") - 1);
 		$Result->CharacterSubRace = substr($html->find('div.chara_profile_title', 0)->plaintext, strpos($html->find('div.chara_profile_title', 0)->plaintext, "/") + 2, (strpos(json_encode($html->find('div.chara_profile_title', 0)->plaintext), "\\n") - 2) - (strpos($html->find('div.chara_profile_title', 0)->plaintext, "/") + 2));
-
-		if (strpos($html->find('div.chara_profile_title', 0), "♂") !== false) $Result->CharacterGender = 'Male'; else $Result->CharacterGender = 'Female';
+		if (strpos($html->find('div.chara_profile_title', 0), "♂") !== false) $Result->CharacterGender = 'male'; else $Result->CharacterGender = 'female';
 		$Result->CharacterWorld = substr($html->find('div.area_footer', 0)->children(2)->children(1)->plaintext, 2, strpos($html->find('div.area_footer', 0)->children(2)->children(1)->plaintext, ")") - 2);
 		$Result->CharacterImage264x360 = substr($html->find('div.bg_chara_264', 0)->find('img', 0), 10, strpos($html->find('div.bg_chara_264', 0)->find('img', 0), 'width') - 12);
 		$Result->CharacterAvatar50x50 = substr($html->find('div.thumb_cont_black_40', 0)->find('img', 0), 10, strpos($html->find('div.thumb_cont_black_40', 0)->find('img', 0), 'width') - 12);

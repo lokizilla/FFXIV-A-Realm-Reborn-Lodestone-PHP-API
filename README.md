@@ -10,7 +10,8 @@ Available Features
 `index.php?request=characterData&characterID=[characterID]`
 
 Returns character data for the given character ID.  
-Sample XML-format data for this can be found at: https://gist.github.com/lokizilla/6513918  
+Sample XML format data for this can be found at: `https://gist.github.com/lokizilla/6513918`  
+Sample JSON format data for this can be found at: `https://gist.github.com/lokizilla/6673781`  
 The PHP object returns data in the same layout.
 
 Accessing via URL
