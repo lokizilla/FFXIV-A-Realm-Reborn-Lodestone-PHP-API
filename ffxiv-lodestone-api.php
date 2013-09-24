@@ -185,7 +185,7 @@ class ffxivLodestoneAPI {
 		if ($ProfileList->children(3)) // check for existence of free company (children(3); grand company is children(2))
 		{
 			$Result->CharacterFreeCompany = rtrim($ProfileList->children(3)->children(2)->plaintext);
-			$Result->CharacterFreeCompanyURL = "http://eu.finalfantasyxiv.com/lodestone".substr($ProfileList->children(3)->find('a', 0), 9, strpos($ProfileList->children(3)->find('a', 0), 'class') - 11); // TODO: hax, fix
+			$Result->CharacterFreeCompanyURL = "http://eu.finalfantasyxiv.com".substr($ProfileList->children(3)->find('a', 0), 9, strpos($ProfileList->children(3)->find('a', 0), 'class') - 11);
 		}
 
 		$Result->CharacterPowergauge->HP = rtrim($PowerGauge->children(0)->plaintext);
